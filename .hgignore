@@ -1,0 +1,9 @@
+# .hgignore
+#
+
+syntax: glob
+
+.pio
+.vscode
+*zip
+ESP32_CAM_OTA/secrets.h
