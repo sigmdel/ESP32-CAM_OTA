@@ -32,43 +32,6 @@ The ESP32 then reboots.
 
 The problem has nothing to do with the **ArduinoOTA** library. Its source is the memory partition in the ESP32-CAM board definition. The `esp32cam.build.partition=huge_app` setting in the board definition file ([board.txt](https://github.com/espressif/arduino-esp32/blob/master/boards.txt)), specify that most of the memory is allocated to a single app partition (3MiB in size) leaving no room in which to buffer an uploaded firmware update. 
 
-<!--
-
-```
-sp32cam.upload.maximum_size=3145728
-esp32cam.upload.maximum_data_size=327680
-...
-esp32cam.build.flash_size=4MB
-esp32cam.build.partitions=huge_app
-esp32cam.build.defines=-DBOARD_HAS_PSRAM -mfix-esp32-psram-cache-issue -mfix-esp32-psram-cache-strategy=memw
-```
-it becomes clear that there is no space left for storing the 
-
-[huge_app.csv](https://github.com/espressif/arduino-esp32/blob/master/tools/partitions/huge_app.csv):
-
-# Name |	Type 	| SubType |	Offset |	Size 
- ---   |  ---   |  ---    |  ---   |  ---   
-nvs |	data |	nvs |	0x9000 |	0x5000 	
-otadata |	data |	ota |	0xe000 |	0x2000 	
-app0 |	app |	ota_0 |	0x10000 |	0x300000 	
-spiffs |	data |	spiffs |	0x310000 |	0xF0000 
-
-
-[default.csv](https://github.com/espressif/arduino-esp32/blob/master/tools/partitions/default.csv)
-
-# Name |	Type 	| SubType |	Offset |	Size 
- ---   |  ---   |  ---    |  ---   |  ---   
-nvs |	data |	nvs |	0x9000 |	0x5000 	
-otadata |	data |	ota |	0xe000 |	0x2000 	
-app0 |	app  |	ota_0 |	0x10000 |	0x140000 	
-app1 |	app |	ota_1 |	0x150000 |	0x140000 	
-spiffs |	data |	spiffs |	0x290000 |	0x170000 	
-
-
-The ota data is only 8,192 bytes
--->
-
-
 ## 3. Solutions in the Arduino Environment
 
 There is no possibility to change the partition scheme in the IDE, contrary to other ESP32 board definitions. One work around is to modify the value of the `esp32cam.build.partition` setting in the `boards.txt` file. It can be found in the `.../packages/esp32/hardware/esp32/2.x.x` directory. It will be possible to run the `BasicOTA` sketch with values such as `default` and `min_spiffs`.
@@ -87,7 +50,7 @@ The other solution is to select a different board in the `Tools` menu of Arduino
    |  Core Debug Level: "None"
    |  PSRAM: "Enabled"
 ```
-Once `ESP32 Wrover Kit (all versions)` is selected all the other values shown above are default values. Three partitions schemes would enable OTA:
+Once the `ESP32 Wrover Kit (all versions)` board is selected all the other values shown above are the defaults. Three partitions schemes would enable OTA:
 
 ```
    1. "Default 4MB with spiffs (1.2MB APP/1.5MB SPIFFS"
@@ -100,7 +63,7 @@ This is certainly the simplest approach. However, there is no assurance that it 
 
 The two solutions discussed in the previous section would certainly work with PIO. The directory containing the `boards.txt` file will be different, of course. On the author's Linux system, it is `~/.platformio/packages/framework-arduinoespressif32`. 
 
-To use a different board definition, then the change must be made in the `platformio.ini` file. 
+Changing the board definition is done in the `platformio.ini` file. 
 
 ```ini
 [env:esp32cam]
@@ -137,7 +100,7 @@ board_build.partitions = min_spiffs.csv  ; needed for OTA
 
 ## 5. Simplifying the use of ArduionoOTA
 
-The `ota.h` and `ota.cpp` files extract most of the OTA code from original `BasicOTA.ino` source to make it easier to add "push" OTA in other projects. This idea is ~~stolen~~ borrowed from Andreas Spiess (*The guy with the Swiss accent* on YouTube and *SensorsIot* on GitHub. The use of the *credentials* file to define the Wi-Fi settings has been extended to include the OTA settings. 
+The `ota.h` and `ota.cpp` files extract most of the OTA code from original `BasicOTA.ino` source to make it easier to add "push" OTA in other projects. This idea is ~~stolen~~ borrowed from Andreas Spiess (*The guy with the Swiss accent* on YouTube and *SensorsIot* on GitHub. The use of the *credentials* file to define the Wi-Fi settings has been extended to include the OTA settings. The file has been renamed `secrets.h`. The later must be created, but a template exits for it named, quite appropriately, `secrets-template.h`.
 
 The firmware of the ESP32 must be modified to enable OTA using ArduinoOTA. Include the `ota.h` and `ota.cpp` files in the project, add a call to `setupOTA()` with the proper parameters in the sketch `setup()` function and add a call to ` handleOTA()` in the `loop()` function.
 
@@ -149,7 +112,7 @@ If **FreeRTOS** is to be used or if OTA debugging is desired, please consult the
 This .INO file is nothing but a long comment but it nevertheless satisfies the Arduino requirements.
 The true source of the project is in the file `main.cpp`. 
 
-**Do not forget** to edit the settings in `secrets-template.h` file and to save it as `secrets.h`. 
+**Do not forget** to edit the settings in `secrets-template.h` file and to save it as `secrets.h`. Without that file, the project will not compile.
 
 If working in the Arduino programming environment, copy the `ESP32_CAM_OTA` directory to the sketchbook directory. The sibling directories, `include`, `lib` and `test` as well as the other files at the same level including this file are not needed.
 
