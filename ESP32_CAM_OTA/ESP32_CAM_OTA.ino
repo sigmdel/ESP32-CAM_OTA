@@ -62,7 +62,7 @@
  * The ota.h/ota.cpp files isolates most of the OTA code from original BasicOTA source to make
  * it easier to add "push" OTA in other projects. These files are a simplification of
  *
- *   ESP32 OTA @ https: github.com/SensorsIot/ESP32-OTA
+ *   ESP32 OTA @ https://github.com/SensorsIot/ESP32-OTA
  *   by SensorsIot (Andreas Spiess - The guy with the Swiss accent)
  *
  * If using OpenRTOS then please consult the original post.
