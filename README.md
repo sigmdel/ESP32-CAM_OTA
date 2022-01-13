@@ -30,13 +30,13 @@ The ESP32 then reboots.
 
 ## 2. Cause
 
-The problem has nothing to do with the **ArduinoOTA** library. Its source is the memory partition in the ESP32-CAM board definition. The `esp32cam.build.partition=huge_app` setting in the board definition file ([board.txt](https://github.com/espressif/arduino-esp32/blob/master/boards.txt)), specify that most of the memory is allocated to a single app partition (3MiB in size) leaving no room in which to buffer an uploaded firmware update. 
+The problem has nothing to do with the **ArduinoOTA** library. Its source is the memory partition in the ESP32-CAM board definition. The `esp32cam.build.partition=huge_app` setting in the board definition file ([board.txt](https://github.com/espressif/arduino-esp32/blob/master/boards.txt)), specifies that most of the memory is allocated to a single app partition (3MiB in size) leaving no room for the uploaded firmware update. 
 
 ## 3. Solutions in the Arduino Environment
 
-There is no possibility to change the partition scheme in the IDE, contrary to other ESP32 board definitions. One work around is to modify the value of the `esp32cam.build.partition` setting in the `boards.txt` file. It can be found in the `.../packages/esp32/hardware/esp32/2.x.x` directory. It will be possible to run the `BasicOTA` sketch with values such as `default` and `min_spiffs`.
+There is no possibility to change the partition scheme in the IDE when the selected board is the AI Thinker ESP32-CAM,  contrary to some of the other ESP32 board definitions. One work around is to modify the value of the `esp32cam.build.partition` setting in the `boards.txt` file itself. It can be found in the `.../packages/esp32/hardware/esp32/2.x.x` directory. It will be possible to run the `BasicOTA` sketch with values such as `default` and `min_spiffs`.
 
-That solution would certainly work, but it would be necessary to edit the board definition file each time the `arduino-esp32` core is updated.
+That solution would certainly work, but it will be necessary to edit the board definition file each time the `arduino-esp32` core is updated.
 
 The other solution is to select a different board in the `Tools` menu of Arduino IDE. The following choice works.
 ```
@@ -50,7 +50,7 @@ The other solution is to select a different board in the `Tools` menu of Arduino
    |  Core Debug Level: "None"
    |  PSRAM: "Enabled"
 ```
-Once the `ESP32 Wrover Kit (all versions)` board is selected all the other values shown above are the defaults. Three partitions schemes would enable OTA:
+Once the `ESP32 Wrover Kit (all versions)` board is selected all the other values shown above are the defaults. OTA is possible with three partitions schemes:
 
 ```
    1. "Default 4MB with spiffs (1.2MB APP/1.5MB SPIFFS"
@@ -87,9 +87,7 @@ platform = espressif32
 board = esp-wrover-kit
 ```
 
-would probably work just as well with the added advantage of confusing everyone.
-
-However, the simplest solution in PlatformIO is to explicitly specify the partition scheme to use.
+would probably work just as well with the added advantage of confusing everyone. However, the simplest solution in PlatformIO is to explicitly specify the partition scheme to use.
 
 ```ini
 [env:esp32cam]
@@ -100,7 +98,7 @@ board_build.partitions = min_spiffs.csv  ; needed for OTA
 
 ## 5. Simplifying the use of ArduionoOTA
 
-The `ota.h` and `ota.cpp` files extract most of the OTA code from original `BasicOTA.ino` source to make it easier to add "push" OTA in other projects. This idea is ~~stolen~~ borrowed from Andreas Spiess (*The guy with the Swiss accent* on YouTube and *SensorsIot* on GitHub. The use of the *credentials* file to define the Wi-Fi settings has been extended to include the OTA settings. The file has been renamed `secrets.h`. The later must be created, but a template exits for it named, quite appropriately, `secrets-template.h`.
+The `ota.h` and `ota.cpp` files extract most of the OTA code from original `BasicOTA.ino` source to make it easier to add "push" OTA in other projects. This idea is ~~stolen~~ borrowed from Andreas Spiess (*The guy with the Swiss accent* on YouTube and *SensorsIot* on GitHub. The use of the *credentials* file to define the Wi-Fi settings has been extended to include the OTA settings. The file has been renamed `secrets.h`. The later must be created, but there is a template named, quite appropriately, `secrets-template.h` which can be edited to produce a valide file..
 
 The firmware of the ESP32 must be modified to enable OTA using ArduinoOTA. Include the `ota.h` and `ota.cpp` files in the project, add a call to `setupOTA()` with the proper parameters in the sketch `setup()` function and add a call to ` handleOTA()` in the `loop()` function.
 
@@ -109,18 +107,19 @@ If **FreeRTOS** is to be used or if OTA debugging is desired, please consult the
 
 ## 6. Last Comments and Instructions
 
-This .INO file is nothing but a long comment but it nevertheless satisfies the Arduino requirements.
-The true source of the project is in the file `main.cpp`. 
+This .INO file is nothing but a long comment but it nevertheless satisfies the Arduino requirements. The true source of the project is in the file `main.cpp`. 
 
 **Do not forget** to edit the settings in `secrets-template.h` file and to save it as `secrets.h`. Without that file, the project will not compile.
 
-If working in the Arduino programming environment, copy the `ESP32_CAM_OTA` directory to the sketchbook directory. The sibling directories, `include`, `lib` and `test` as well as the other files at the same level including this file are not needed.
+If working in the Arduino programming environment, copy the `ESP32_CAM_OTA` directory to the sketchbook directory. The sibling directories, `include`, `lib` and `test` as well as the other files at the same level, including this file, are not needed.
 
-The `upload_port` and `upload_flags` settings in `platformio.ini` must be edited to match the values in `secrets.h` if using the PlatformIO programming environment is used.
+The `upload_port` and `upload_flags` settings in `platformio.ini` must be edited to match the values in `secrets.h` in the PlatformIO programming environment.
 
 ## 7. License
  
-Since this project is clearly derivative work, it can be assumed that the license under which Espressif released **BasicOTA** applies. However there is no copyright notice in that file. The only mention of a license is in the root directory of the [Arduino core for the ESP32, ESP32-S2 and ESP32-C](https://github.com/espressif/arduino-esp32) repository containing the four source files. There it states that the *LGPL-2.1 License* applies.  
+Since this project is clearly derivative work, it can be assumed that the license under which Espressif released **BasicOTA** applies. However there is no copyright notice in that file. The only mention of a license is in the root directory of the [Arduino core for the ESP32, ESP32-S2 and ESP32-C](https://github.com/espressif/arduino-esp32) repository containing the four source files. There it states that the *LGPL-2.1 License* applies. That license is meant primarly for libraries and not a demonstration program.
+
+There is no copyright or license information in the Andreas Spiess (SensorIoT) GitHub repository. 
 
 As for any original work found in this repository, it is released under the **BSD Zero Clause** ([SPDX](https://spdx.dev/): [0BSD](https://spdx.org/licenses/0BSD.html)) licence.
 
