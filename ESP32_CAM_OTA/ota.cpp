@@ -1,18 +1,18 @@
 #include <ArduinoOTA.h>
 
-void setupOTA(const char* hostname="", uint16_t port=0, const char* password="", const char* pswdhash="") {
+void setupOTA(const char* hostname="", uint16_t port=3232, const char* pwd="", const char* pswdhash="") {
   // Port defaults to 3232
   // Hostname defaults to esp3232-[MAC]
   // No authentication by default
   // Password can be set with it's md5 value as well
   if (strlen(hostname))
     ArduinoOTA.setHostname(hostname);
-  if (port)
+  if (port && port!=3232)
     ArduinoOTA.setPort(port);
   if (strlen(pswdhash))
     ArduinoOTA.setPasswordHash(pswdhash);
-  else if (strlen(password)) 
-    ArduinoOTA.setPassword(password);
+  else if (strlen(pwd))
+    ArduinoOTA.setPassword(pwd);
 
   ArduinoOTA
     .onStart([]() {

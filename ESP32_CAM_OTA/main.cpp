@@ -26,7 +26,7 @@ void setup() {
     delay(5000);
     ESP.restart();
   }
-  setupOTA(hostname, otaport, otapwd);
+  setupOTA(otaname, otaport, otapwd);
 
   Serial.println("Ready");
   Serial.print("IP address: ");
